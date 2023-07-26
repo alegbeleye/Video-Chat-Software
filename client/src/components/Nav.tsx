@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Style from '../Styles.module.css'
 import logo from '../Assets/logo.svg'
 
-const Nav = ({ audio, stream }:any) => {
+const Nav = ({ audio, stream, endCall }:any) => {
 
     const [isPlay, setIsPlay] = useState(true);
     const [isAudio, setIsAudio] = useState(false);
@@ -37,7 +37,7 @@ const Nav = ({ audio, stream }:any) => {
                 <img src={logo} alt="logo" />
             </div>
             {stream && <div className={Style.callSection}>
-                <button className={Style.endCall}>
+                <button onClick={endCall} className={Style.endCall}>
                     <span className="material-symbols-sharp">
                         Call
                     </span>

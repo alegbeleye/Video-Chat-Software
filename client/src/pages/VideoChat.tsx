@@ -26,6 +26,7 @@ function VideoChat(): JSX.Element {
   const [callerSignal, setCallerSignal] = useState<any>();
   const [callAccepted, setCallAccepted] = useState<boolean>(false);
   const [chatData, setChatData] = useState<ChatData[]>([])
+  const [callEnded, setCallEnded] = useState<boolean>(false);
 
   const userVideoRef = useRef<HTMLVideoElement>(null);
   const partnerVideoRef = useRef<HTMLVideoElement>(null);
@@ -68,6 +69,10 @@ function VideoChat(): JSX.Element {
     socketRef.current.on('user404', (msg: string) => {
     })
 
+    socketRef.current.on("userLeft", ()=>{
+      setCallEnded(true);
+    })
+
     return () => {
       socketRef.current.disconnect();
     };
@@ -76,6 +81,15 @@ function VideoChat(): JSX.Element {
 
   const handleUser404 = () => {
     navigate("/", { state: 'User does not exist' });
+  }
+
+  const endCall = () => {
+    try{
+    socketRef.current.disconnect();
+    navigate("/", { state: 'Call Ended' });
+    }catch(err){
+      console.log(err)
+    }
   }
 
   const callPeer = (id: string) => {
@@ -133,7 +147,7 @@ function VideoChat(): JSX.Element {
 
   return (
     <div className={Style.videoPage}>
-      <Nav video={userVideoRef.current?.srcObject} audio={userVideoRef.current} stream={stream} />
+      <Nav audio={userVideoRef.current} stream={stream} endCall={endCall} />
 
       <section className={Style.videoAndChatSection}>
 
@@ -141,8 +155,9 @@ function VideoChat(): JSX.Element {
 
           {partnerUsername && <p className={Style.partnerUsername}>{partnerUsername}</p>}
           <video className={Style.userVideo} playsInline muted ref={userVideoRef} autoPlay />
-          {callAccepted && <video className={Style.partnerVideo} playsInline muted ref={partnerVideoRef} autoPlay />}
+          {callAccepted && !callEnded && <video className={Style.partnerVideo} playsInline muted ref={partnerVideoRef} autoPlay />}
           {!receivingCall && isNewMeeting && <p className={Style.waitingMsg}>Waiting for someone to join...</p>}
+          {callEnded && <p className={Style.waitingMsg}>{"Call Ended. Have a good day :)"}</p>}
 
           {receivingCall && !callAccepted && (
             <div className={Style.requestMsg}>
